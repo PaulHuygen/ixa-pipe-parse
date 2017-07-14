@@ -1,0 +1,11 @@
+#!/bin/bash
+thisdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $thisdir
+echo "This dir: " $thisdir
+parse_version='1.1.2'
+jarfile=ixa-pipe-parse-$parse_version.jar
+wget http://ixa2.si.ehu.es/ixa-pipes/models/parse-models.tgz
+tar -xzf parse-models.tgz
+rm parse-models.tgz
+mvn clean package
+cp target/$jarfile .
