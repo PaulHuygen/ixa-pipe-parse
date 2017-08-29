@@ -1,7 +1,48 @@
 #!/bin/bash
-thisdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+modname=ixa-pipe-parse
+#
+# Find the path to this module
+#
+if
+  [ -z ${MODROOT+x} ]
+then
+  # Find out path ourselves
+  thisdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
+else
+  thisdir=$MODROOT/$modname
+fi
+thisscript=${thisdir}/run
+#
+# Find the language
+#
+if
+  [ -z "${NAFLANG+x}" ]
+then
+  naffile=`mktemp -t naf.XXXXXX`
+  cat >$naffile
+  NAFLANG=`cat $naffile | python ${thisdir}/langdetect.py` 
+  export NAFLANG
+  cat $naffile | $thisscript
+  result=$?
+  rm $naffile
+  exit $result
+fi
+#
+# Select the language-specific model
+#
+if
+    [ "$NAFLANG" == "es" ]
+then
+    parsemodel="es-parser-chunking.bin"
+else
+    parsemodel="en-parser-chunking.bin"
+fi
+#
+#
+# Run the module 
+#
 cd ${thisdir}
 parse_version='1.1.2'
 jarfile=ixa-pipe-parse-$parse_version.jar
 
-java -Xmx1000m -jar $jarfile parse -g sem -m parse-models/en-parser-chunking.bin
+java -Xmx1000m -jar $jarfile parse -g sem -m parse-models/$parsemodel
